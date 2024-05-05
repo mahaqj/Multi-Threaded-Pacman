@@ -1,2 +1,2 @@
 # Multi-Threaded-Pacman
-Operating Systems Project
+Operating Systems Project by Maha & Nabeeha
