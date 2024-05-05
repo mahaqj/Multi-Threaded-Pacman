@@ -1,0 +1,52 @@
+#include <GL/glut.h>
+#include <math.h>
+#include "pacman_t1.h"
+
+#define COLUMNS 19
+#define ROWS 22
+
+void init() //m
+{
+	glClearColor(0.0, 0.0, 0.2, 1.0); //sets background colour
+	initGrid(COLUMNS, ROWS);
+}
+
+void display_callback() //m 
+{
+	glClear(GL_COLOR_BUFFER_BIT); 
+	drawGrid();
+	glutSwapBuffers(); 
+}
+
+void reshape_callback(int w, int h) //m
+{
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    if (w <= h) 
+    {
+        glOrtho(0.0, COLUMNS, 0.0, COLUMNS * (GLfloat)h / (GLfloat)w, -1.0, 1.0);
+    } else 
+    {
+        glOrtho(0.0, ROWS * (GLfloat)w / (GLfloat)h, 0.0, ROWS, -1.0, 1.0);
+    }
+    
+    glMatrixMode(GL_MODELVIEW);
+}
+
+
+int main(int argc, char** argv)
+{
+	glutInit(&argc, argv);	
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+	glutInitWindowSize(1400, 800);
+	glutCreateWindow("Pacman");
+	glutDisplayFunc(display_callback); 
+	glutReshapeFunc(reshape_callback);
+	init();
+	
+	glutMainLoop(); 
+	
+	return 0;
+}
