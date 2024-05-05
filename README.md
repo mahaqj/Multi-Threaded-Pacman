@@ -1,2 +1,2 @@
-# Multi-Threaded-Pacman
+# Multi-Threaded Pacman
 Operating Systems Project by Maha & Nabeeha
