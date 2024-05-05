@@ -1,5 +1,6 @@
 #ifndef PACMAN_T1_H_INCLUDED
 #define PACMAN_T1_H_INCLUDED
+#include <math.h>
 
 int maze[19][22] = 
 {
@@ -12,7 +13,7 @@ int maze[19][22] =
     {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
     {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1},
+    {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1}, //
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
     {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
     {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
@@ -23,8 +24,33 @@ int maze[19][22] =
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
 };
+//m
+int pacdots[19][22] = 
+{
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0},
+    {0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+    {0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0},
+    {0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0},
+    {0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0}, //
+    {0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0},
+    {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0},
+    {0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+    {0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+    {0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+    {0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
 
 int gridX, gridY;
+int pacmanX = 9, pacmanY = 1;
+int score = 0;
 
 void initGrid(int x, int y)
 {
@@ -32,7 +58,7 @@ void initGrid(int x, int y)
 	gridY = y;
 }
 
-void square(int x, int y) // Function to draw a square
+void square(int x, int y) //m
 {
     glBegin(GL_QUADS); 
     glVertex2f(x, y);
@@ -42,7 +68,46 @@ void square(int x, int y) // Function to draw a square
     glEnd(); 
 }
 
-void drawGrid()
+void drawCircle(float cx, float cy, float r, int num_segments) //m
+{
+    glBegin(GL_POLYGON); //polygon: to fill in
+    for(int i = 0; i < num_segments; i++)
+    {
+        float theta = 2.0f * 3.1415926f * float(i) / float(num_segments);
+        float x = r * cosf(theta);
+        float y = r * sinf(theta);
+
+        glVertex2f(x + cx, y + cy);
+    }
+    glEnd();
+}
+
+void drawPacdots() //m
+{
+    glColor3f(1.0, 1.0, 0.8);
+    
+    for (int x = 0; x < gridX; x++)
+    {
+        for (int y = 0; y < gridY; y++)
+        {
+            if (pacdots[x][y] == 1)
+            {
+                float centerX = x + 0.5;
+                float centerY = y + 0.5;
+                
+                drawCircle(centerX, centerY, 0.06, 20); 
+            }
+        }
+    }
+}
+
+void drawPacman() //m
+{
+	glColor3f(1.0f, 1.0f, 0.0f);
+	drawCircle(pacmanX + 0.5, pacmanY + 0.5, 0.4, 20); 
+}
+
+void drawGrid() //m
 {
 	for (int x = 0; x < gridX; x++)
 	{
@@ -50,11 +115,26 @@ void drawGrid()
 		{
 			if (maze[x][y] == 1)
 			{
-				glColor3f(0.261, 0.416, 0.437);
+				glColor3f(26.0f / 255.0f, 133.0f / 255.0f, 163.0f / 255.0f);
+
 				square(x, y);
 			}
 		}
 	}
+	drawPacdots(); //write 2 in array for big pellets jissay ghost blue hojata hai
+	drawPacman();
+}
+
+
+
+void smallsquare()
+{//anvdfhdbvs,jf
+    glBegin(GL_QUADS); 
+    glVertex2f(x, y);
+    glVertex2f(x + 1, y);
+    glVertex2f(x + 1, y + 1);
+    glVertex2f(x, y + 1);
+    glEnd();
 }
 
 #endif
