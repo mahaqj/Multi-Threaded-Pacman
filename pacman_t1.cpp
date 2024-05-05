@@ -3,9 +3,10 @@
 #include <cstring>
 #include <cstdio>
 #include "pacman_t1.h"
-//max score can be 190 --------------
+
 #define COLUMNS 19
 #define ROWS 22
+char currentmove = ' ';
 
 void init() //m
 {
@@ -18,16 +19,37 @@ void display_callback() //m
 	glClear(GL_COLOR_BUFFER_BIT); //clears buffer specified by the argument
 	drawGrid();
 	
-	
-	
-	glColor3f(1.0, 1.0, 1.0); // Set text color to white
-    glRasterPos2f(20, 20); // Set position for score display
-    char scoreText[20];
-    snprintf(scoreText, sizeof(scoreText), "Score: %d", score); // Convert score to string
-    int len = strlen(scoreText);
-    for (int i = 0; i < len; i++) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, scoreText[i]); // Render each character of the score
-    }
+	//printing score:
+	glColor3f(1.0, 1.0, 1.0);
+    	glRasterPos2f(20, 5); 
+    	char scoreText[20];
+    	snprintf(scoreText, sizeof(scoreText), "Score: %d", score);
+    	int len = strlen(scoreText);
+    	for (int i = 0; i < len; i++) 
+    	{
+        	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, scoreText[i]);
+    	}
+    	
+    	//printing lives:
+    	glColor3f(1.0, 1.0, 1.0);
+	glRasterPos2f(20, 4);
+	char livesText[20];
+	snprintf(livesText, sizeof(livesText), "Lives: %d", lives);
+	len = strlen(livesText);
+	for (int i = 0; i < len; i++) 
+	{
+    		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, livesText[i]);
+	}
+    	
+    	//printing string:
+    	glColor3f(1.0, 1.0, 0.8);
+    	glRasterPos2f(28, 16); 
+    	const char* str = "By Maha Qaiser & Nabeeha Shafiq";
+    	len = strlen(str);
+    	for (int i = 0; i < len; i++) 
+    	{
+        	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
+    	}
 	
 	glutSwapBuffers(); //next frame is displayed on the screen
 }
@@ -80,9 +102,9 @@ void checkteleport() //m
 	}
 }
 
-void keyboard_callback(unsigned char key, int x, int y) //m
+void movement() //m
 {
-    switch (key)
+    switch (currentmove)
     {
         case 'w':
         case 'W': 
@@ -125,6 +147,17 @@ void keyboard_callback(unsigned char key, int x, int y) //m
 }
 
 
+void keyboard_callback(unsigned char key, int x, int y) //m
+{
+    currentmove = key;
+}
+
+void update(int dummy) //m
+{
+    movement();
+    glutTimerFunc(200, update, 0); // set the next update after 100ms
+}
+
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);	//initialise glut when program called
@@ -135,6 +168,11 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape_callback);
 	glutKeyboardFunc(keyboard_callback);
 	init();
+	
+	//glutTimerFunc(100, update, 0); // start the movement update loop
+	//^ too fast. sorta can maybe be used for ghost boost?
+	
+	glutTimerFunc(200, update, 0);
 	
 	glutMainLoop(); //window will be displayed + processing will start
 	
