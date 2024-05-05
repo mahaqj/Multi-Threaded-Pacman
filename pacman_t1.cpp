@@ -12,6 +12,14 @@ void init() //m
 {
 	glClearColor(0.0, 0.0, 0.2, 1.0); //sets the background colour
 	initGrid(COLUMNS, ROWS);
+	g1.x = 9;
+	g1.y = 5;
+	g2.x = 9;
+	g2.y = 9;
+	g3.x = 9;
+	g3.y = 17;
+	g4.x = 1;
+	g4.y = 1;
 }
 
 void display_callback() //m
@@ -152,10 +160,19 @@ void keyboard_callback(unsigned char key, int x, int y) //m
     currentmove = key;
 }
 
-void update(int dummy) //m
+void updatePacman(int dummy) 
 {
-    movement();
-    glutTimerFunc(200, update, 0); // set the next update after 100ms
+    movement(); 
+    glutTimerFunc(200, updatePacman, 0);
+}
+
+void updateGhosts(int dummy) 
+{
+    moveGhost(g1);  
+    moveGhost(g2);
+    moveGhost(g3);
+    moveGhost(g4);
+    glutTimerFunc(800, updateGhosts, 0); 
 }
 
 int main(int argc, char** argv)
@@ -172,7 +189,8 @@ int main(int argc, char** argv)
 	//glutTimerFunc(100, update, 0); // start the movement update loop
 	//^ too fast. sorta can maybe be used for ghost boost?
 	
-	glutTimerFunc(200, update, 0);
+	glutTimerFunc(200, updatePacman, 0);
+    	glutTimerFunc(800, updateGhosts, 0);  
 	
 	glutMainLoop(); //window will be displayed + processing will start
 	

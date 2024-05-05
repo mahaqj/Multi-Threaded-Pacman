@@ -1,6 +1,8 @@
 #ifndef PACMAN_T1_H_INCLUDED
 #define PACMAN_T1_H_INCLUDED
 #include <math.h>
+#include <cmath>
+#include <cstdlib> 
 
 int maze[19][22] = 
 {
@@ -60,13 +62,17 @@ void initGrid(int x, int y) //m
 
 void drawSquare(int x, int y) //m
 {
+    glColor3f(26.0f / 255.0f, 133.0f / 255.0f, 163.0f / 255.0f); // Outline color
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Set polygon mode to draw outlines only
     glBegin(GL_QUADS); 
     glVertex2f(x, y);
     glVertex2f(x + 1, y);
     glVertex2f(x + 1, y + 1);
     glVertex2f(x, y + 1);
-    glEnd(); 
+    glEnd();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Reset polygon mode to draw filled shapes
 }
+
 
 void drawCircle(float cx, float cy, float r, int num_segments) //m
 {
@@ -81,6 +87,83 @@ void drawCircle(float cx, float cy, float r, int num_segments) //m
     }
     glEnd();
 }
+
+struct Ghost
+{
+   int x = 0;
+   int y = 0;
+};
+
+void moveGhost(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1)
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1)
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1)
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1)
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+
+Ghost g1, g2, g3, g4;
+	
+void drawGhost()
+{
+	glColor3f(1.0f, 0.0f, 0.0f);
+	drawCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20); 
+	
+	glColor3f(1.0f, 1.0f, 0.0f);
+	drawCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20); 
+	
+	glColor3f(1.0f, 0.0f, 1.0f);
+	drawCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20); 
+	
+	glColor3f(1.0f, 0.5f, 0.5f);
+	drawCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20); 
+}
+
+
 
 void drawPacdots() //m
 {
@@ -156,6 +239,7 @@ void drawGrid() //m
 	drawPacdots(); // 2 in array for big pellets jissay ghost blue hojata hai
 	drawPacman();
 	drawTitle();
+	drawGhost();
 }
 
 #endif
