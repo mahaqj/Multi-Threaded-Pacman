@@ -14,7 +14,7 @@ void display_callback() //m
 	
 	//printing score:
 	glColor3f(1.0, 1.0, 1.0);
-    	glRasterPos2f(20, 5); 
+    	glRasterPos2f(20, 15); 
     	char scoreText[20];
     	snprintf(scoreText, sizeof(scoreText), "Score: %d", score);
     	int len = strlen(scoreText);
@@ -35,7 +35,7 @@ void display_callback() //m
 	
     	//printing lives:
     	glColor3f(1.0, 1.0, 1.0);
-	glRasterPos2f(20, 4);
+	glRasterPos2f(20, 16);
 	char livesText[20];
 	snprintf(livesText, sizeof(livesText), "Lives: %d", lives);
 	len = strlen(livesText);
@@ -44,16 +44,16 @@ void display_callback() //m
     		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, livesText[i]);
 	}
     	
-    	if (lives == 0)
+    	if (lives <= 0) 
     	{
-    		glColor3f(1.0, 1.0, 1.0);
-		glRasterPos2f(20, 2);
-		const char* str = "Game over";
-    		len = strlen(str);
-    		for (int i = 0; i < len; i++) 
-    		{
-        		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
-    		}
+        	glColor3f(1.0, 0.0, 0.0); // Set color to red
+        	glRasterPos2f(20, 17);
+        	const char* gameOverMsg = "Game Over!";
+        	len = strlen(gameOverMsg);
+        	for (int i = 0; i < len; i++) 
+        	{
+            		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameOverMsg[i]);
+        	}
     	}
     	
 	glutSwapBuffers(); //next frame is displayed on the screen
@@ -90,10 +90,10 @@ void updatePacman(int dummy)
 
 void updateGhosts(int dummy) 
 {
-    moveGhost(g1);  
-    moveGhost(g2);
-    moveGhost(g3);
-    moveGhost(g4);
+    moveGhost1(g1);  
+    moveGhost2(g2);
+    moveGhost3(g3);
+    moveGhost4(g4);
     glutTimerFunc(800, updateGhosts, 0); 
 }
 

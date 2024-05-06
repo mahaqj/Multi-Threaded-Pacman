@@ -74,13 +74,13 @@ void init() //m
 	glClearColor(0.0, 0.0, 0.2, 1.0); //sets the background colour
 	initGrid(19, 22);
 	g1.x = 9;
-	g1.y = 5;
-	g2.x = 9;
-	g2.y = 9;
+	g1.y = 12;
+	g2.x = 8;
+	g2.y = 11;
 	g3.x = 9;
-	g3.y = 17;
-	g4.x = 1;
-	g4.y = 1;
+	g3.y = 11;
+	g4.x = 10;
+	g4.y = 11;
 }
 
 void drawSquare(int x, int y) //m
@@ -143,21 +143,28 @@ void checkteleport() //m
 
 void checkghost()
 {
+	if (lives > 0)
+	{
 	if (pacmanX == g1.x && pacmanY == g1.y)
 	{
 		lives--;
+		init();
 	}
 	if (pacmanX == g2.x && pacmanY == g2.y)
 	{
 		lives--;
+		init();
 	}
 	if (pacmanX == g3.x && pacmanY == g3.y)
 	{
 		lives--;
+		init();
 	}
 	if (pacmanX == g4.x && pacmanY == g4.y)
 	{
 		lives--;
+		init();
+	}
 	}
 }
 
@@ -213,39 +220,79 @@ void drawGhost()
 {
 	glColor3f(1.0f, 0.0f, 0.0f);
 	drawCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20); 
-	
-	glColor3f(1.0f, 1.0f, 0.0f);
+        
+	glColor3f(1.0f, 0.4f, 0.7f); //pinky
 	drawCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20); 
 	
-	glColor3f(1.0f, 0.0f, 1.0f);
+	glColor3f(0.0f, 0.9f, 0.9f); //inky
 	drawCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20); 
 	
-	glColor3f(1.0f, 0.5f, 0.5f);
+	glColor3f(1.0f, 0.5f, 0.0f); //clyde
 	drawCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20); 
 }
 
-void moveGhost(Ghost& ghost) 
+bool checkghost1collision(int x, int y)
+{
+	if ((x == g2.x && y == g2.y) || (x == g3.x && y == g3.y) || (x == g4.x && y == g4.y))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool checkghost2collision(int x, int y)
+{
+	if ((x == g1.x && y == g1.y) || (x == g3.x && y == g3.y) || (x == g4.x && y == g4.y))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool checkghost3collision(int x, int y)
+{
+	if ((x == g2.x && y == g2.y) || (x == g1.x && y == g1.y) || (x == g4.x && y == g4.y))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+bool checkghost4collision(int x, int y)
+{
+	if ((x == g2.x && y == g2.y) || (x == g3.x && y == g3.y) || (x == g1.x && y == g1.y))
+	{
+		return 1;
+	}
+	return 0;
+}
+
+void moveGhost1(Ghost& ghost) 
 {
     int dx = pacmanX - ghost.x;
     int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
 
     if (std::abs(dx) > std::abs(dy)) 
     {
-        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1) 
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y)) 
         {
             ghost.x += 1;
         } 
-        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1) 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y)) 
         {
             ghost.x -= 1;
         }
         else
         {
-            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1)
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1))
             {
                 ghost.y += 1;
             }
-            else if (maze[ghost.x][ghost.y - 1] != 1)
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1))
             {
                 ghost.y -= 1;
             }
@@ -253,21 +300,184 @@ void moveGhost(Ghost& ghost)
     } 
     else 
     {
-        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1) 
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1)) 
         {
             ghost.y += 1;
         } 
-        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1) 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1)) 
         {
             ghost.y -= 1;
         }
         else
         {
-            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1)
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y))
             {
                 ghost.x += 1;
             }
-            else if (maze[ghost.x - 1][ghost.y] != 1)
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void moveGhost2(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost2collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost2collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost2collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost2collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost2collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost2collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void moveGhost3(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost3collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost3collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost3collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost3collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost3collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost3collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void moveGhost4(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost4collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost4collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost4collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost4collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost4collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost4collision(x-1,y))
             {
                 ghost.x -= 1;
             }
@@ -333,6 +543,144 @@ void drawTitle() //m
     }
 }
 
+int ghost_[14][14] = {
+	{0,0,0,0,0,1,1,1,1,0,0,0,0,0},
+	{0,0,0,1,1,1,1,1,1,1,1,0,0,0},
+	{0,0,1,1,1,1,1,1,1,1,1,1,0,0},
+	{0,1,2,2,1,1,1,1,2,2,1,1,1,0},
+	{0,2,2,2,2,1,1,2,2,2,2,1,1,0},
+	{0,3,3,2,2,1,1,3,3,2,2,1,1,0},
+	{1,3,3,2,2,1,1,3,3,2,2,1,1,1},
+	{1,1,2,2,1,1,1,1,2,2,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,1,0,1,1,1,0,0,1,1,1,0,1,1},
+	{1,0,0,0,1,1,0,0,1,1,0,0,0,1}
+};
+void drawHomescreenghost()
+{
+    float x = 20.5; // Start at these coordinates
+    float y = 5.0;
+
+    // Draw the first ghost
+    for (int i = 0; i < 14; i++) 
+    {
+        for (int j = 0; j < 14; j++) 
+        {
+            if (ghost_[i][j] == 1) 
+            {
+                glColor3f(0.0f, 0.8f, 0.8f);
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+            else if (ghost_[i][j] == 2)
+            {
+                glColor3f(1.0f, 1.0f, 1.0f); 
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+        }
+    }
+    
+    x += 4.5;
+
+    for (int i = 0; i < 14; i++) 
+    {
+        for (int j = 0; j < 14; j++) 
+        {
+            if (ghost_[i][j] == 1) 
+            {
+                glColor3f(1.0f, 0.4f, 0.7f); 
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+            else if (ghost_[i][j] == 2)
+            {
+                glColor3f(1.0f, 1.0f, 1.0f); 
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+        }
+    }
+    
+    x += 4.5;
+
+    for (int i = 0; i < 14; i++) 
+    {
+        for (int j = 0; j < 14; j++) 
+        {
+            if (ghost_[i][j] == 1) 
+            {
+                glColor3f(1.0f, 0.0f, 0.0f);
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+            else if (ghost_[i][j] == 2)
+            {
+                glColor3f(1.0f, 1.0f, 1.0f); 
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+        }
+    }
+    
+    x += 4.5;
+
+    for (int i = 0; i < 14; i++) 
+    {
+        for (int j = 0; j < 14; j++) 
+        {
+            if (ghost_[i][j] == 1) 
+            {
+                glColor3f(1.0f, 0.5f, 0.0f);
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();
+            }
+            else if (ghost_[i][j] == 2)
+            {
+                glColor3f(1.0f, 1.0f, 1.0f); 
+                glBegin(GL_QUADS);
+                glVertex2f(x + j * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - i * 0.23);
+                glVertex2f(x + (j + 1) * 0.23, y - (i + 1) * 0.23);
+                glVertex2f(x + j * 0.23, y - (i + 1) * 0.23);
+                glEnd();   
+            }
+        }
+    }
+}
+
+
 void drawGrid() //m
 {
 	for (int x = 0; x < gridX; x++)
@@ -350,6 +698,7 @@ void drawGrid() //m
 	drawPacman();
 	drawTitle();
 	drawGhost();
+	drawHomescreenghost();
 }
 
 #endif
