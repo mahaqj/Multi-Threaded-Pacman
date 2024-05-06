@@ -53,11 +53,34 @@ int pacdots[19][22] =
 int gridX, gridY;
 int pacmanX = 9, pacmanY = 1;
 int score = 0, lives = 3;
+char currentmove = 'w';
 
-void initGrid(int x, int y) //m
+struct Ghost
+{
+   int x = 0;
+   int y = 0;
+};
+	
+Ghost g1, g2, g3, g4;
+
+void initGrid(int x, int y)
 {
 	gridX = x;
 	gridY = y;
+}
+
+void init() //m
+{
+	glClearColor(0.0, 0.0, 0.2, 1.0); //sets the background colour
+	initGrid(19, 22);
+	g1.x = 9;
+	g1.y = 5;
+	g2.x = 9;
+	g2.y = 9;
+	g3.x = 9;
+	g3.y = 17;
+	g4.x = 1;
+	g4.y = 1;
 }
 
 void drawSquare(int x, int y) //m
@@ -88,11 +111,118 @@ void drawCircle(float cx, float cy, float r, int num_segments) //m
     glEnd();
 }
 
-struct Ghost
+bool checkwall(int x, int y) //m
 {
-   int x = 0;
-   int y = 0;
-};
+	if (maze[x][y] == 1)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+void checkpacdot(int x, int y) //m
+{
+	if (pacdots[x][y] == 1)
+	{
+		score++;
+		pacdots[x][y] = 0;
+	}
+}
+
+void checkteleport() //m
+{
+	if (pacmanX == 19 && pacmanY == 11)
+	{
+		pacmanX = 0;
+	}
+	else if (pacmanX == -1 && pacmanY == 11)
+	{
+		pacmanX = 18;
+	}
+}
+
+void checkghost()
+{
+	if (pacmanX == g1.x && pacmanY == g1.y)
+	{
+		lives--;
+	}
+	if (pacmanX == g2.x && pacmanY == g2.y)
+	{
+		lives--;
+	}
+	if (pacmanX == g3.x && pacmanY == g3.y)
+	{
+		lives--;
+	}
+	if (pacmanX == g4.x && pacmanY == g4.y)
+	{
+		lives--;
+	}
+}
+
+void movement() //m
+{
+    switch (currentmove)
+    {
+        case 'w':
+        case 'W': 
+            if (!checkwall(pacmanX, pacmanY+1))
+            {
+            	pacmanY++;
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        case 'a':
+        case 'A':
+            if (!checkwall(pacmanX-1, pacmanY))
+            {
+            	pacmanX--;
+            	checkteleport();
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        case 's':
+        case 'S':
+            if (!checkwall(pacmanX, pacmanY-1))
+            {
+            	pacmanY--;
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        case 'd':
+        case 'D':
+            if (!checkwall(pacmanX+1, pacmanY))
+            {
+            	pacmanX++;
+            	checkteleport();
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay(); //request redisplay to update the screen
+}
+
+void drawGhost()
+{
+	glColor3f(1.0f, 0.0f, 0.0f);
+	drawCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20); 
+	
+	glColor3f(1.0f, 1.0f, 0.0f);
+	drawCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20); 
+	
+	glColor3f(1.0f, 0.0f, 1.0f);
+	drawCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20); 
+	
+	glColor3f(1.0f, 0.5f, 0.5f);
+	drawCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20); 
+}
 
 void moveGhost(Ghost& ghost) 
 {
@@ -144,26 +274,6 @@ void moveGhost(Ghost& ghost)
         }
     }
 }
-
-
-Ghost g1, g2, g3, g4;
-	
-void drawGhost()
-{
-	glColor3f(1.0f, 0.0f, 0.0f);
-	drawCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20); 
-	
-	glColor3f(1.0f, 1.0f, 0.0f);
-	drawCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20); 
-	
-	glColor3f(1.0f, 0.0f, 1.0f);
-	drawCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20); 
-	
-	glColor3f(1.0f, 0.5f, 0.5f);
-	drawCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20); 
-}
-
-
 
 void drawPacdots() //m
 {

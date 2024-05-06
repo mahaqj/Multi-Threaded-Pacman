@@ -6,21 +6,6 @@
 
 #define COLUMNS 19
 #define ROWS 22
-char currentmove = ' ';
-
-void init() //m
-{
-	glClearColor(0.0, 0.0, 0.2, 1.0); //sets the background colour
-	initGrid(COLUMNS, ROWS);
-	g1.x = 9;
-	g1.y = 5;
-	g2.x = 9;
-	g2.y = 9;
-	g3.x = 9;
-	g3.y = 17;
-	g4.x = 1;
-	g4.y = 1;
-}
 
 void display_callback() //m
 {
@@ -38,6 +23,16 @@ void display_callback() //m
         	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, scoreText[i]);
     	}
     	
+    	//printing string:
+    	glColor3f(1.0, 1.0, 0.8);
+    	glRasterPos2f(28, 16); 
+    	const char* str = "By Maha Qaiser & Nabeeha Shafiq";
+    	len = strlen(str);
+    	for (int i = 0; i < len; i++) 
+    	{
+        	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
+    	}
+	
     	//printing lives:
     	glColor3f(1.0, 1.0, 1.0);
 	glRasterPos2f(20, 4);
@@ -49,16 +44,18 @@ void display_callback() //m
     		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, livesText[i]);
 	}
     	
-    	//printing string:
-    	glColor3f(1.0, 1.0, 0.8);
-    	glRasterPos2f(28, 16); 
-    	const char* str = "By Maha Qaiser & Nabeeha Shafiq";
-    	len = strlen(str);
-    	for (int i = 0; i < len; i++) 
+    	if (lives == 0)
     	{
-        	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
+    		glColor3f(1.0, 1.0, 1.0);
+		glRasterPos2f(20, 2);
+		const char* str = "Game over";
+    		len = strlen(str);
+    		for (int i = 0; i < len; i++) 
+    		{
+        		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str[i]);
+    		}
     	}
-	
+    	
 	glutSwapBuffers(); //next frame is displayed on the screen
 }
 
@@ -79,81 +76,6 @@ void reshape_callback(int w, int h) //m
     
     glMatrixMode(GL_MODELVIEW);
 }
-
-bool checkwall(int x, int y) //m
-{
-	if (maze[x][y] == 1)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-void checkpacdot(int x, int y) //m
-{
-	if (pacdots[x][y] == 1)
-	{
-		score++;
-		pacdots[x][y] = 0;
-	}
-}
-
-void checkteleport() //m
-{
-	if (pacmanX == 19 && pacmanY == 11)
-	{
-		pacmanX = 0;
-	}
-	else if (pacmanX == -1 && pacmanY == 11)
-	{
-		pacmanX = 18;
-	}
-}
-
-void movement() //m
-{
-    switch (currentmove)
-    {
-        case 'w':
-        case 'W': 
-            if (!checkwall(pacmanX, pacmanY+1))
-            {
-            	pacmanY++;
-            	checkpacdot(pacmanX, pacmanY);
-            }
-            break;
-        case 'a':
-        case 'A':
-            if (!checkwall(pacmanX-1, pacmanY))
-            {
-            	pacmanX--;
-            	checkteleport();
-            	checkpacdot(pacmanX, pacmanY);
-            }
-            break;
-        case 's':
-        case 'S':
-            if (!checkwall(pacmanX, pacmanY-1))
-            {
-            	pacmanY--;
-            	checkpacdot(pacmanX, pacmanY);
-            }
-            break;
-        case 'd':
-        case 'D':
-            if (!checkwall(pacmanX+1, pacmanY))
-            {
-            	pacmanX++;
-            	checkteleport();
-            	checkpacdot(pacmanX, pacmanY);
-            }
-            break;
-        default:
-            break;
-    }
-    glutPostRedisplay(); //request redisplay to update the screen
-}
-
 
 void keyboard_callback(unsigned char key, int x, int y) //m
 {
