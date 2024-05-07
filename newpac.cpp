@@ -4,53 +4,122 @@
 #include <cstdio>
 #include "newpac.h"
 #include <pthread.h>
+#include <unistd.h>
 
 #define COLUMNS 19
 #define ROWS 22
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // Mutex to synchronize access to OpenGL context
+pthread_t ghostThreads[4], gameEngineThread, uiThread; 
 
-void* ui_function(void*)
+void* updateGhost(void* arg) 
 {
-    while (true) {
-        pthread_mutex_lock(&mutex); // Lock the mutex
-
-        glClear(GL_COLOR_BUFFER_BIT);
-        drawGrid();
-        glutSwapBuffers();
-
-        pthread_mutex_unlock(&mutex); // Unlock the mutex
+    Ghost* ghost = (Ghost*)arg;
+    while (1) 
+    {
+        moveGhost1(*ghost); 
+        usleep(800000); 
     }
     return NULL;
 }
 
-int main(int argc, char** argv)
+void startGhostThreads() 
 {
-    glutInit(&argc, argv);    // initialise glut when program called
+    pthread_create(&ghostThreads[0], NULL, updateGhost, (void*)&g1);
+    pthread_create(&ghostThreads[1], NULL, updateGhost, (void*)&g2);
+    pthread_create(&ghostThreads[2], NULL, updateGhost, (void*)&g3);
+    pthread_create(&ghostThreads[3], NULL, updateGhost, (void*)&g4);
+}
+
+void stopGhostThreads() 
+{
+    for (int i = 0; i < 4; ++i) 
+    {
+        pthread_cancel(ghostThreads[i]);
+    }
+}
+
+void updatePacman(int dummy) 
+{
+    movement(); 
+    glutTimerFunc(200, updatePacman, 0);
+}
+
+void ui_function() 
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawGrid();
+    drawPacdots();
+    drawTitle();
+    drawHomescreenghost();
+    otherui();
+    drawPacman();
+    drawGhost();
+    glutSwapBuffers();
+}
+
+void keyboard_callback(unsigned char key, int x, int y) 
+{
+    currentmove = key;
+}
+
+void* uifunc(void* arg) 
+{
+    while (1) 
+    {
+        ui_function(); 
+        usleep(800000); 
+    }
+    return NULL;
+}
+void startuiThread()
+{
+    pthread_create(&uiThread, NULL, uifunc, NULL);
+}
+void stopuiThread()
+{
+    pthread_cancel(uiThread);
+}
+
+void* gameEngine(void* arg) 
+{
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(1400, 800);
     glutCreateWindow("Pacman");
 
-    pthread_t ui_thread;
-    pthread_create(&ui_thread, NULL, ui_function, NULL); // Create a thread for UI function
+    glutDisplayFunc(ui_function);
+    glutReshapeFunc(reshape_callback);//callback func in header file
+    glutKeyboardFunc(keyboard_callback);
+    
+    glutTimerFunc(200, updatePacman, 0);
+    
+    init();
+    startuiThread();
+    startGhostThreads();
 
-    glutDisplayFunc([]() {
-        // Empty display function, as rendering will be done in the separate thread
-    });
+    glutMainLoop();
 
-    glutReshapeFunc(reshape_callback);
-    //glutKeyboardFunc(keyboard_callback);
-    //init();
-
-    //glutTimerFunc(100, update, 0); // start the movement update loop
-    //^ too fast. sorta can maybe be used for ghost boost?
-
-    //glutTimerFunc(200, updatePacman, 0);
-    //glutTimerFunc(800, updateGhosts, 0);  
-
-    glutMainLoop(); //window will be displayed + processing will start
-
-    pthread_join(ui_thread, NULL); // Wait for the UI thread to finish
-    return 0;
+    stopGhostThreads();
+    stopuiThread();
+    return NULL;
 }
 
+void startGameEngineThread() 
+{
+    pthread_create(&gameEngineThread, NULL, gameEngine, NULL);
+}
+
+void stopGameEngineThread() 
+{
+    pthread_cancel(gameEngineThread);
+}
+
+int main(int argc, char** argv) 
+{
+    glutInit(&argc, argv);
+
+    startGameEngineThread();
+
+    pthread_join(gameEngineThread, NULL);
+
+    return 0;
+}

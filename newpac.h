@@ -4,10 +4,34 @@
 #include <cmath>
 #include <cstdlib> 
 
+
+struct Ghost
+{
+   int x = 0;
+   int y = 0;
+};
+
+int pacmanX = 9, pacmanY = 17;
 int gridX = 19, gridY = 22;
 int score = 0, lives = 3;
 int ROWS = 22, COLUMNS = 19;
+char currentmove = 'w';
 
+Ghost g1, g2, g3, g4;
+	
+void init()
+{
+	
+	g1.x = 9;
+	g1.y = 12;
+	g2.x = 8;
+	g2.y = 11;
+	g3.x = 9;
+	g3.y = 11;
+	g4.x = 10;
+	g4.y = 11;
+}
+	
 void reshape_callback(int w, int h) //m
 {
     glViewport(0, 0, w, h);
@@ -51,6 +75,15 @@ void drawCircle(float cx, float cy, float r, int num_segments) //m
 
         glVertex2f(x + cx, y + cy);
     }
+    glEnd();
+}
+
+void drawTriangle(float x, float y, float size) 
+{
+    glBegin(GL_TRIANGLES);
+    glVertex2f(x, y + size); // Top vertex
+    glVertex2f(x - size, y - size); // Bottom left vertex
+    glVertex2f(x + size, y - size); // Bottom right vertex
     glEnd();
 }
 
@@ -355,6 +388,398 @@ void drawPacdots() //m
             }
         }
     }
+}
+
+void drawGhost() 
+{
+    // Red ghost
+    glColor3f(1.0f, 0.0f, 0.0f);
+    drawTriangle(g1.x + 0.5, g1.y + 0.5, 0.4);
+    //drawSemiCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20);
+
+    // Pink ghost
+    glColor3f(1.0f, 0.4f, 0.7f);
+    drawTriangle(g2.x + 0.5, g2.y + 0.5, 0.4);
+    //drawSemiCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20);
+
+    // Inky ghost
+    glColor3f(0.0f, 0.9f, 0.9f);
+    drawTriangle(g3.x + 0.5, g3.y + 0.5, 0.4);
+    //drawSemiCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20);
+
+    // Clyde ghost
+    glColor3f(1.0f, 0.5f, 0.0f);
+    drawTriangle(g4.x + 0.5, g4.y + 0.5, 0.4);
+    //drawSemiCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20);
+}
+
+void drawPacman() //m
+{
+	glColor3f(1.0f, 1.0f, 0.0f);
+	drawCircle(pacmanX + 0.5, pacmanY + 0.5, 0.4, 20); 
+}
+
+void checkghost()
+{
+	if (lives > 0)
+	{
+	if (pacmanX == g1.x && pacmanY == g1.y)
+	{
+		lives--;
+		init();
+	}
+	if (pacmanX == g2.x && pacmanY == g2.y)
+	{
+		lives--;
+		init();
+	}
+	if (pacmanX == g3.x && pacmanY == g3.y)
+	{
+		lives--;
+		init();
+	}
+	if (pacmanX == g4.x && pacmanY == g4.y)
+	{
+		lives--;
+		init();
+	}
+	}
+}
+
+bool checkghost1collision(int x, int y)
+{
+	if ((x == g2.x && y == g2.y) || (x == g3.x && y == g3.y) || (x == g4.x && y == g4.y))
+	{
+		return 1;
+	}
+	checkghost();
+	return 0;
+}
+
+bool checkghost2collision(int x, int y)
+{
+	if ((x == g1.x && y == g1.y) || (x == g3.x && y == g3.y) || (x == g4.x && y == g4.y))
+	{
+		return 1;
+	}
+	checkghost();
+	return 0;
+}
+
+bool checkghost3collision(int x, int y)
+{
+	if ((x == g2.x && y == g2.y) || (x == g1.x && y == g1.y) || (x == g4.x && y == g4.y))
+	{
+		return 1;
+	}
+	checkghost();
+	return 0;
+}
+
+bool checkghost4collision(int x, int y)
+{
+	if ((x == g2.x && y == g2.y) || (x == g3.x && y == g3.y) || (x == g1.x && y == g1.y))
+	{
+		return 1;
+	}
+	checkghost();
+	return 0;
+}
+
+void moveGhost1(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void moveGhost2(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost2collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost2collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost2collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost2collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost2collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost2collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void moveGhost3(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost3collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost3collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost3collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost3collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost3collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost3collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void moveGhost4(Ghost& ghost) 
+{
+    int dx = pacmanX - ghost.x;
+    int dy = pacmanY - ghost.y;
+    
+    int x = ghost.x;
+    int y = ghost.y;
+
+    if (std::abs(dx) > std::abs(dy)) 
+    {
+        if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y)) 
+        {
+            ghost.x += 1;
+        } 
+        else if (dx < 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost4collision(x-1,y)) 
+        {
+            ghost.x -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost4collision(x,y+1))
+            {
+                ghost.y += 1;
+            }
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost4collision(x,y-1))
+            {
+                ghost.y -= 1;
+            }
+        }
+    } 
+    else 
+    {
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost4collision(x,y+1)) 
+        {
+            ghost.y += 1;
+        } 
+        else if (dy < 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost4collision(x,y-1)) 
+        {
+            ghost.y -= 1;
+        }
+        else
+        {
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y))
+            {
+                ghost.x += 1;
+            }
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost4collision(x-1,y))
+            {
+                ghost.x -= 1;
+            }
+        }
+    }
+}
+
+void checkpacdot(int x, int y) //m
+{
+	if (pacdots[x][y] == 1)
+	{
+		score++;
+		pacdots[x][y] = 0;
+	}
+}
+
+void checkteleport() //m
+{
+	if (pacmanX == 19 && pacmanY == 11)
+	{
+		pacmanX = 0;
+	}
+	else if (pacmanX == -1 && pacmanY == 11)
+	{
+		pacmanX = 18;
+	}
+}
+
+bool checkwall(int x, int y) //m
+{
+	if (maze[x][y] == 1)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+void movement() //m
+{
+    switch (currentmove)
+    {
+        case 'w':
+        case 'W': 
+            if (!checkwall(pacmanX, pacmanY+1))
+            {
+            	pacmanY++;
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        case 'a':
+        case 'A':
+            if (!checkwall(pacmanX-1, pacmanY))
+            {
+            	pacmanX--;
+            	checkteleport();
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        case 's':
+        case 'S':
+            if (!checkwall(pacmanX, pacmanY-1))
+            {
+            	pacmanY--;
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        case 'd':
+        case 'D':
+            if (!checkwall(pacmanX+1, pacmanY))
+            {
+            	pacmanX++;
+            	checkteleport();
+            	checkpacdot(pacmanX, pacmanY);
+            	checkghost();
+            }
+            break;
+        default:
+            break;
+    }
+    glutPostRedisplay(); //request redisplay to update the screen
 }
 
 #endif
