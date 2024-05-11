@@ -1,0 +1,150 @@
+#include <GL/glut.h>
+#include <math.h>
+#include <cstring>
+#include <cstdio>
+#include "newpac.h"
+#include <pthread.h>
+#include <unistd.h>
+#include <semaphore.h>
+
+#define COLUMNS 19
+#define ROWS 22
+
+pthread_t ghostThreads[4], gameEngineThread, uiThread;
+pthread_mutex_t mutex;
+sem_t gameEngineSemaphore;
+
+void* updateGhost(void* arg)
+{
+    Ghost* ghost = (Ghost*)arg;
+    while (1)
+    {
+        //pthread_mutex_lock(&mutex); // Lock mutex before updating
+        if (ghost->x == g1.x && ghost->y == g1.y)
+        {
+        	pthread_mutex_lock(&mutex); // Lock mutex before updating
+        	moveGhost1(*ghost);
+        	pthread_mutex_unlock(&mutex); // Unlock mutex after updating
+        }
+        else if (ghost->x == g2.x && ghost->y == g2.y)
+        {
+        	pthread_mutex_lock(&mutex); // Lock mutex before updating
+        	moveGhost2(*ghost);
+        	pthread_mutex_unlock(&mutex); // Unlock mutex after updating
+        }
+        else if (ghost->x == g3.x && ghost->y == g3.y)
+        {
+        	pthread_mutex_lock(&mutex); // Lock mutex before updating
+        	moveGhost3(*ghost);
+        	pthread_mutex_unlock(&mutex); // Unlock mutex after updating
+        }
+        else if (ghost->x == g4.x && ghost->y == g4.y)
+        {
+        	pthread_mutex_lock(&mutex); // Lock mutex before updating
+        	moveGhost4(*ghost);
+        	pthread_mutex_unlock(&mutex); // Unlock mutex after updating
+        }
+        //pthread_mutex_unlock(&mutex); // Unlock mutex after updating
+        usleep(800000);
+    }
+    return NULL;
+}
+
+void startGhostThreads()
+{
+    pthread_create(&ghostThreads[0], NULL, updateGhost, (void*)&g1);
+    pthread_create(&ghostThreads[1], NULL, updateGhost, (void*)&g2);
+    pthread_create(&ghostThreads[2], NULL, updateGhost, (void*)&g3);
+    pthread_create(&ghostThreads[3], NULL, updateGhost, (void*)&g4);
+}
+
+void stopGhostThreads()
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        pthread_cancel(ghostThreads[i]);
+    }
+}
+
+void updatePacman(int dummy)
+{
+    movement();
+    glutTimerFunc(200, updatePacman, 0);
+}
+
+void keyboard_callback(unsigned char key, int x, int y)
+{
+    currentmove = key;
+}
+
+void* uifunc(void* arg)
+{
+    while (1)
+    {
+        ui_function();
+        usleep(800000);
+    }
+    return NULL;
+}
+
+void startuiThread()
+{
+    pthread_create(&uiThread, NULL, uifunc, NULL);
+}
+
+void stopuiThread()
+{
+    pthread_cancel(uiThread);
+}
+
+void* gameEngine(void* arg)
+{
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitWindowSize(1400, 800);
+    glutCreateWindow("Pacman");
+
+    glutDisplayFunc(ui_function);
+    glutReshapeFunc(reshape_callback); //callback func in header file
+    glutKeyboardFunc(keyboard_callback);
+
+    glutTimerFunc(200, updatePacman, 0);
+
+    init();
+    startuiThread();
+    startGhostThreads();
+
+    glutMainLoop();
+
+    stopGhostThreads();
+    stopuiThread();
+
+    sem_post(&gameEngineSemaphore); // Release semaphore when game engine thread finishes
+    return NULL;
+}
+
+void startGameEngineThread()
+{
+    sem_init(&gameEngineSemaphore, 0, 0); // Initialize semaphore
+    pthread_create(&gameEngineThread, NULL, gameEngine, NULL);
+}
+
+void stopGameEngineThread()
+{
+    pthread_cancel(gameEngineThread);
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+
+    pthread_mutex_init(&mutex, NULL); // Initialize mutex
+
+    startGameEngineThread();
+
+    sem_wait(&gameEngineSemaphore); // Wait for game engine thread to finish
+
+    pthread_mutex_destroy(&mutex); // Destroy mutex
+    sem_destroy(&gameEngineSemaphore); // Destroy semaphore
+
+    return 0;
+}
