@@ -12,9 +12,9 @@ using namespace std;
 #define COLUMNS 19
 #define ROWS 22
 
-pthread_t ghostThreads[4], gameEngineThread, uiThread;
+pthread_t ghostThreads[4], gameEngineThread, uiThread, pacmanThread;
 pthread_mutex_t mutex; 
-sem_t gameEngineSemaphore;
+sem_t gameEngineSemaphore, pacmanSemaphore;
 pthread_mutex_t coutmutex;
 
 void* updateGhost(void* arg)
@@ -60,6 +60,17 @@ void* updateGhost(void* arg)
     return NULL;
 }
 
+void* updatePacman(void* arg)
+{
+    while (1)
+    {
+        movement();
+        usleep(800000);
+        sem_post(&pacmanSemaphore); // Signal that Pacman movement is done
+    }
+    return NULL;
+}
+
 void startGhostThreads()
 {
     pthread_create(&ghostThreads[0], NULL, updateGhost, (void*)&g1);
@@ -76,10 +87,14 @@ void stopGhostThreads()
     }
 }
 
-void updatePacman(int dummy)
+void startPacmanThread()
 {
-    movement();
-    glutTimerFunc(200, updatePacman, 0);
+    pthread_create(&pacmanThread, NULL, updatePacman, NULL);
+}
+
+void stopPacmanThread()
+{
+    pthread_cancel(pacmanThread);
 }
 
 void keyboard_callback(unsigned char key, int x, int y)
@@ -122,15 +137,15 @@ void* gameEngine(void* arg)
     glutReshapeFunc(reshape_callback); //callback func in header file
     glutKeyboardFunc(keyboard_callback);
 
-    glutTimerFunc(200, updatePacman, 0);
-
     init();
     startuiThread();
     startGhostThreads();
+    startPacmanThread();
 
     glutMainLoop();
 
     stopGhostThreads();
+    stopPacmanThread();
     stopuiThread();
 
     sem_post(&gameEngineSemaphore); // Release semaphore when game engine thread finishes
@@ -140,6 +155,7 @@ void* gameEngine(void* arg)
 void startGameEngineThread()
 {
     sem_init(&gameEngineSemaphore, 0, 0); // Initialize semaphore
+    sem_init(&pacmanSemaphore, 0, 1); // Initialize pacman semaphore with 1 to allow movement at the beginning
     pthread_create(&gameEngineThread, NULL, gameEngine, NULL);
 }
 
