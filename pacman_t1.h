@@ -15,7 +15,7 @@ int maze[19][22] =
     {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
     {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1}, //middle
+    {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1}, //middle
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
     {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
     {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
@@ -163,26 +163,56 @@ void checkghost()
 {
 	if (lives > 0)
 	{
-	if (pacmanX == g1.x && pacmanY == g1.y)
+	
+	if (pacmanX == g1.x && pacmanY == g1.y && g1.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
-	if (pacmanX == g2.x && pacmanY == g2.y)
+	if (pacmanX == g2.x && pacmanY == g2.y && g2.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
-	if (pacmanX == g3.x && pacmanY == g3.y)
+	if (pacmanX == g3.x && pacmanY == g3.y && g3.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
-	if (pacmanX == g4.x && pacmanY == g4.y)
+	if (pacmanX == g4.x && pacmanY == g4.y && g4.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
+	if (pacmanX == g1.x && pacmanY == g1.y && g1.isFrightened == 1)
+	{
+		g1.x = 9;
+		g1.x = 12;
+    		g1.isFrightened = 0; 
+    		score += 100;
+	}
+	if (pacmanX == g2.x && pacmanY == g2.y && g2.isFrightened == 1)
+	{
+		g2.x = 8;
+		g2.y = 11;
+    		g2.isFrightened = 0; 
+    		score += 100;
+	}
+	if (pacmanX == g3.x && pacmanY == g3.y && g3.isFrightened == 1)
+	{
+		g3.x = 9;
+		g3.y = 11;
+    		g3.isFrightened = 0; 
+    		score += 100;
+	}
+	if (pacmanX == g4.x && pacmanY == g4.y && g4.isFrightened == 1)
+	{
+		g4.x = 10;
+		g4.y = 11;
+    		g4.isFrightened = 0; 
+    		score += 100;
+	}
+	
 	}
 }
 
@@ -264,32 +294,48 @@ void drawGhost()
     {
     	glColor3f(0.0f, 0.0f, 1.0f); //blue
     }
+    if (g1.x == 9 && g1.y == 1)
+    {
+    	glColor3f(1.0f, 0.0f, 0.0f);
+    }
     drawTriangle(g1.x + 0.5, g1.y + 0.5, 0.4);
     //drawSemiCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20);
 
     // Pink ghost
     glColor3f(1.0f, 0.4f, 0.7f);
-    if (g1.isFrightened == 1)
+    if (g2.isFrightened == 1)
     {
     	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g2.x == 8 && g2.y == 11)
+    {
+    	glColor3f(1.0f, 0.4f, 0.7f);
     }
     drawTriangle(g2.x + 0.5, g2.y + 0.5, 0.4);
     //drawSemiCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20);
 
     // Inky ghost
     glColor3f(0.0f, 0.9f, 0.9f);
-    if (g1.isFrightened == 1)
+    if (g3.isFrightened == 1)
     {
     	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g3.x == 9 && g3.y == 11)
+    {
+    	 glColor3f(0.0f, 0.9f, 0.9f);
     }
     drawTriangle(g3.x + 0.5, g3.y + 0.5, 0.4);
     //drawSemiCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20);
 
     // Clyde ghost
     glColor3f(1.0f, 0.5f, 0.0f);
-    if (g1.isFrightened == 1)
+    if (g4.isFrightened == 1)
     {
     	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g4.x == 10 && g4.y == 11)
+    {
+    	glColor3f(1.0f, 0.5f, 0.0f);
     }
     drawTriangle(g4.x + 0.5, g4.y + 0.5, 0.4);
     //drawSemiCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20);
@@ -343,11 +389,11 @@ void moveGhost1(Ghost& ghost)
     int x = ghost.x;
     int y = ghost.y;
 
-    if (g1.isFrightened == 1)
+    if (g1.isFrightened == 1 || g2.isFrightened == 1 || g3.isFrightened == 1 || g4.isFrightened == 1)
     {
         pelletmoves++;
     }
-    if (pelletmoves == 10)
+    if (pelletmoves == 13)
     {
     	pelletmoves = 0;
     	g1.isFrightened = 0;
