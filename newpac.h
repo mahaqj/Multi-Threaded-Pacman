@@ -4,7 +4,6 @@
 #include <cmath>
 #include <cstdlib> 
 
-
 struct Ghost
 {
    int x = 0;
@@ -311,6 +310,17 @@ void otherui()
     	for (int i = 0; i < len; i++) 
     	{
         	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, scoreText[i]);
+    	}
+    	if (score == 186) //for now
+    	{
+    		glColor3f(0.0, 1.0, 0.0); // Set color to red
+        	glRasterPos2f(20, 10);
+        	const char* gameWonMsg = "Game Won!";
+        	len = strlen(gameWonMsg);
+        	for (int i = 0; i < len; i++) 
+        	{
+            		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, gameWonMsg[i]);
+        	}
     	}
     	
     	//printing string:
@@ -780,6 +790,19 @@ void movement() //m
             break;
     }
     glutPostRedisplay(); //request redisplay to update the screen
+}
+
+void ui_function() 
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawGrid();
+    drawPacdots();
+    drawTitle();
+    drawHomescreenghost();
+    otherui();
+    drawPacman();
+    drawGhost();
+    glutSwapBuffers();
 }
 
 #endif
