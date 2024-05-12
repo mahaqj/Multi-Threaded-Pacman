@@ -14,7 +14,7 @@ void display_callback() //m
 	
 	//printing score:
 	glColor3f(1.0, 1.0, 1.0);
-    	glRasterPos2f(20, 15); 
+    	glRasterPos2f(20, 12); 
     	char scoreText[20];
     	snprintf(scoreText, sizeof(scoreText), "Score: %d", score);
     	int len = strlen(scoreText);
@@ -35,7 +35,7 @@ void display_callback() //m
 	
     	//printing lives:
     	glColor3f(1.0, 1.0, 1.0);
-	glRasterPos2f(20, 16);
+	glRasterPos2f(20, 11);
 	char livesText[20];
 	snprintf(livesText, sizeof(livesText), "Lives: %d", lives);
 	len = strlen(livesText);
@@ -47,7 +47,7 @@ void display_callback() //m
     	if (lives <= 0) 
     	{
         	glColor3f(1.0, 0.0, 0.0); // Set color to red
-        	glRasterPos2f(20, 17);
+        	glRasterPos2f(20, 10);
         	const char* gameOverMsg = "Game Over!";
         	len = strlen(gameOverMsg);
         	for (int i = 0; i < len; i++) 

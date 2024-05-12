@@ -55,10 +55,13 @@ int pacmanX = 9, pacmanY = 1;
 int score = 0, lives = 3;
 char currentmove = 'w';
 
+int pelletmoves = 0;
+
 struct Ghost
 {
    int x = 0;
    int y = 0;
+   int isFrightened = 0;
 };
 	
 Ghost g1, g2, g3, g4;
@@ -81,6 +84,10 @@ void init() //m
 	g3.y = 11;
 	g4.x = 10;
 	g4.y = 11;
+	g1.isFrightened = 0;
+	g2.isFrightened = 0;
+	g3.isFrightened = 0;
+	g4.isFrightened = 0;
 }
 
 void drawSquare(int x, int y) //m
@@ -126,6 +133,17 @@ void checkpacdot(int x, int y) //m
 	{
 		score++;
 		pacdots[x][y] = 0;
+	}
+	if (g1.isFrightened != 1)
+	{
+	if (pacdots[x][y] == 2 && g1.isFrightened == 0)
+	{
+		g1.isFrightened = 1;
+		g2.isFrightened = 1;
+		g3.isFrightened = 1;
+		g4.isFrightened = 1;
+		pacdots[x][y] = 0;
+	}
 	}
 }
 
@@ -216,19 +234,65 @@ void movement() //m
     glutPostRedisplay(); //request redisplay to update the screen
 }
 
-void drawGhost()
+void drawTriangle(float x, float y, float size) 
 {
-	glColor3f(1.0f, 0.0f, 0.0f);
-	drawCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20); 
-        
-	glColor3f(1.0f, 0.4f, 0.7f); //pinky
-	drawCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20); 
-	
-	glColor3f(0.0f, 0.9f, 0.9f); //inky
-	drawCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20); 
-	
-	glColor3f(1.0f, 0.5f, 0.0f); //clyde
-	drawCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20); 
+    glBegin(GL_TRIANGLES);
+    glVertex2f(x, y + size); // Top vertex
+    glVertex2f(x - size, y - size); // Bottom left vertex
+    glVertex2f(x + size, y - size); // Bottom right vertex
+    glEnd();
+}
+
+/*void drawSemiCircle(float x, float y, float radius, int segments) 
+{
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(x, y); // Center of the semi-circle
+    for (int i = 0; i <= segments / 2; ++i) {
+        float theta = i * (2.0f * M_PI / segments);
+        float cx = x + radius * cos(theta);
+        float cy = y + radius * sin(theta);
+        glVertex2f(cx, cy);
+    }
+    glEnd();
+}*/
+
+void drawGhost() 
+{
+    // Red ghost
+    glColor3f(1.0f, 0.0f, 0.0f);
+    if (g1.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    drawTriangle(g1.x + 0.5, g1.y + 0.5, 0.4);
+    //drawSemiCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20);
+
+    // Pink ghost
+    glColor3f(1.0f, 0.4f, 0.7f);
+    if (g1.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    drawTriangle(g2.x + 0.5, g2.y + 0.5, 0.4);
+    //drawSemiCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20);
+
+    // Inky ghost
+    glColor3f(0.0f, 0.9f, 0.9f);
+    if (g1.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    drawTriangle(g3.x + 0.5, g3.y + 0.5, 0.4);
+    //drawSemiCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20);
+
+    // Clyde ghost
+    glColor3f(1.0f, 0.5f, 0.0f);
+    if (g1.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    drawTriangle(g4.x + 0.5, g4.y + 0.5, 0.4);
+    //drawSemiCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20);
 }
 
 bool checkghost1collision(int x, int y)
@@ -237,6 +301,7 @@ bool checkghost1collision(int x, int y)
 	{
 		return 1;
 	}
+	checkghost();
 	return 0;
 }
 
@@ -246,6 +311,7 @@ bool checkghost2collision(int x, int y)
 	{
 		return 1;
 	}
+	checkghost();
 	return 0;
 }
 
@@ -255,6 +321,7 @@ bool checkghost3collision(int x, int y)
 	{
 		return 1;
 	}
+	checkghost();
 	return 0;
 }
 
@@ -264,6 +331,7 @@ bool checkghost4collision(int x, int y)
 	{
 		return 1;
 	}
+	checkghost();
 	return 0;
 }
 
@@ -275,7 +343,19 @@ void moveGhost1(Ghost& ghost)
     int x = ghost.x;
     int y = ghost.y;
 
-
+    if (g1.isFrightened == 1)
+    {
+        pelletmoves++;
+    }
+    if (pelletmoves == 10)
+    {
+    	pelletmoves = 0;
+    	g1.isFrightened = 0;
+	g2.isFrightened = 0;
+	g3.isFrightened = 0;
+	g4.isFrightened = 0;
+    }
+	
     if (std::abs(dx) > std::abs(dy)) 
     {
         if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y)) 
