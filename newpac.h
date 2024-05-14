@@ -8,13 +8,18 @@ struct Ghost
 {
    int x = 0;
    int y = 0;
+   bool isFrightened = 0;
+   bool isFast = 0;
+   bool speedBoosted = 0;
 };
 
-int pacmanX = 9, pacmanY = 17;
+int pacmanX = 9, pacmanY = 1;
 int gridX = 19, gridY = 22;
 int score = 0, lives = 3;
 int ROWS = 22, COLUMNS = 19;
 char currentmove = 'w';
+int pelletmoves = 0;
+int pellet_consumed_x = 0, pellet_consumed_y = 0;
 
 Ghost g1, g2, g3, g4;
 	
@@ -29,6 +34,10 @@ void init()
 	g3.y = 11;
 	g4.x = 10;
 	g4.y = 11;
+	g1.isFrightened = 0;
+	g2.isFrightened = 0;
+	g3.isFrightened = 0;
+	g4.isFrightened = 0;
 }
 	
 void reshape_callback(int w, int h) //m
@@ -97,7 +106,7 @@ int maze[19][22] =
     {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
     {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-    {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1}, //middle
+    {1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1}, //middle
     {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1},
     {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1},
     {1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1},
@@ -404,21 +413,53 @@ void drawGhost()
 {
     // Red ghost
     glColor3f(1.0f, 0.0f, 0.0f);
+    if (g1.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g1.x == 9 && g1.y == 1)
+    {
+    	glColor3f(1.0f, 0.0f, 0.0f);
+    }
     drawTriangle(g1.x + 0.5, g1.y + 0.5, 0.4);
     //drawSemiCircle(g1.x + 0.5, g1.y + 0.5, 0.4, 20);
 
     // Pink ghost
     glColor3f(1.0f, 0.4f, 0.7f);
+    if (g2.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g2.x == 8 && g2.y == 11)
+    {
+    	glColor3f(1.0f, 0.4f, 0.7f);
+    }
     drawTriangle(g2.x + 0.5, g2.y + 0.5, 0.4);
     //drawSemiCircle(g2.x + 0.5, g2.y + 0.5, 0.4, 20);
 
     // Inky ghost
     glColor3f(0.0f, 0.9f, 0.9f);
+    if (g3.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g3.x == 9 && g3.y == 11)
+    {
+    	 glColor3f(0.0f, 0.9f, 0.9f);
+    }
     drawTriangle(g3.x + 0.5, g3.y + 0.5, 0.4);
     //drawSemiCircle(g3.x + 0.5, g3.y + 0.5, 0.4, 20);
 
     // Clyde ghost
     glColor3f(1.0f, 0.5f, 0.0f);
+    if (g4.isFrightened == 1)
+    {
+    	glColor3f(0.0f, 0.0f, 1.0f); //blue
+    }
+    if (g4.x == 10 && g4.y == 11)
+    {
+    	glColor3f(1.0f, 0.5f, 0.0f);
+    }
     drawTriangle(g4.x + 0.5, g4.y + 0.5, 0.4);
     //drawSemiCircle(g4.x + 0.5, g4.y + 0.5, 0.4, 20);
 }
@@ -431,30 +472,73 @@ void drawPacman() //m
 
 void checkghost()
 {
-	if (lives > 0)
-	{
-	if (pacmanX == g1.x && pacmanY == g1.y)
-	{
-		lives--;
-		init();
-	}
-	if (pacmanX == g2.x && pacmanY == g2.y)
+    if (lives > 0)
+    {
+	
+	if (pacmanX == g1.x && pacmanY == g1.y && g1.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
-	if (pacmanX == g3.x && pacmanY == g3.y)
+	if (pacmanX == g2.x && pacmanY == g2.y && g2.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
-	if (pacmanX == g4.x && pacmanY == g4.y)
+	if (pacmanX == g3.x && pacmanY == g3.y && g3.isFrightened != 1)
 	{
 		lives--;
 		init();
 	}
+	if (pacmanX == g4.x && pacmanY == g4.y && g4.isFrightened != 1)
+	{
+		lives--;
+		init();
 	}
+	if (pacmanX == g1.x && pacmanY == g1.y && g1.isFrightened == 1)
+	{
+		g1.x = 9;
+		g1.x = 12;
+    		g1.isFrightened = 0; 
+    		score += 100;
+	}
+	if (pacmanX == g2.x && pacmanY == g2.y && g2.isFrightened == 1)
+	{
+		g2.x = 8;
+		g2.y = 11;
+    		g2.isFrightened = 0; 
+    		score += 100;
+	}
+	if (pacmanX == g3.x && pacmanY == g3.y && g3.isFrightened == 1)
+	{
+		g3.x = 9;
+		g3.y = 11;
+    		g3.isFrightened = 0; 
+    		score += 100;
+	}
+	if (pacmanX == g4.x && pacmanY == g4.y && g4.isFrightened == 1)
+	{
+		g4.x = 10;
+		g4.y = 11;
+    		g4.isFrightened = 0; 
+    		score += 100;
+	}
+    }
 }
+
+int checkteleport_gh(int x, int y) //m
+{
+	if (x == 19 && y == 11)
+	{
+		return 0;
+	}
+	else if (x == -1 && y == 11)
+	{
+		return 18;
+	}
+	return x;
+}
+
 
 bool checkghost1collision(int x, int y)
 {
@@ -503,8 +587,21 @@ void moveGhost1(Ghost& ghost)
     
     int x = ghost.x;
     int y = ghost.y;
-
-
+    
+    if (g1.isFrightened == 1 || g2.isFrightened == 1 || g3.isFrightened == 1 || g4.isFrightened == 1)
+    {
+        pelletmoves++;
+    }
+    if (pelletmoves == 40)
+    {
+    	pelletmoves = 0;
+    	g1.isFrightened = 0;
+	g2.isFrightened = 0;
+	g3.isFrightened = 0;
+	g4.isFrightened = 0;
+    }
+ if (g1.isFrightened == 0)
+ {
     if (std::abs(dx) > std::abs(dy)) 
     {
         if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y)) 
@@ -517,11 +614,11 @@ void moveGhost1(Ghost& ghost)
         }
         else
         {
-            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1))
+            if (rand() % 2 == 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1)) 
             {
                 ghost.y += 1;
             }
-            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1))
+            else if (maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1))  
             {
                 ghost.y -= 1;
             }
@@ -529,7 +626,7 @@ void moveGhost1(Ghost& ghost)
     } 
     else 
     {
-        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1)) 
+        if (dy > 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1))  
         {
             ghost.y += 1;
         } 
@@ -539,16 +636,47 @@ void moveGhost1(Ghost& ghost)
         }
         else
         {
-            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y))
+            if (rand() % 2 == 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y)) 
             {
                 ghost.x += 1;
             }
-            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y))
+            else if (maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y)) 
             {
                 ghost.x -= 1;
             }
         }
     }
+  }
+  else
+  {
+  	if (std::abs(dx) > std::abs(dy)) {
+    if (dx > 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y))   {
+        ghost.x -= 1;
+    } else if (dx < 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y))   {
+        ghost.x += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1))   {
+            ghost.y -= 1;
+        } else if (maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1))   {
+            ghost.y += 1;
+        }
+    }
+} else {
+    if (dy > 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost1collision(x,y-1))   {
+        ghost.y -= 1;
+    } else if (dy < 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost1collision(x,y+1))   {
+        ghost.y += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost1collision(x-1,y))   {
+            ghost.x -= 1;
+        } else if (maze[ghost.x + 1][ghost.y] != 1 && !checkghost1collision(x+1,y))   {
+            ghost.x += 1;
+        }
+    }
+}
+
+  }
+  x = checkteleport_gh(x, y);
 }
 
 void moveGhost2(Ghost& ghost) 
@@ -559,6 +687,8 @@ void moveGhost2(Ghost& ghost)
     int x = ghost.x;
     int y = ghost.y;
 
+    if (g2.isFrightened == 0)
+ {
     if (std::abs(dx) > std::abs(dy)) 
     {
         if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y)) 
@@ -603,6 +733,37 @@ void moveGhost2(Ghost& ghost)
             }
         }
     }
+  }
+  else
+  {
+  	if (std::abs(dx) > std::abs(dy)) {
+    if (dx > 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost2collision(x-1,y)) {
+        ghost.x -= 1;
+    } else if (dx < 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y)) {
+        ghost.x += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost2collision(x,y-1)) {
+            ghost.y -= 1;
+        } else if (maze[ghost.x][ghost.y + 1] != 1 && !checkghost2collision(x,y+1)) {
+            ghost.y += 1;
+        }
+    }
+} else {
+    if (dy > 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost2collision(x,y-1)) {
+        ghost.y -= 1;
+    } else if (dy < 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost2collision(x,y+1)) {
+        ghost.y += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost2collision(x-1,y)) {
+            ghost.x -= 1;
+        } else if (maze[ghost.x + 1][ghost.y] != 1 && !checkghost2collision(x+1,y)) {
+            ghost.x += 1;
+        }
+    }
+}
+
+  }
+  x = checkteleport_gh(x, y);
 }
 
 void moveGhost3(Ghost& ghost) 
@@ -614,6 +775,8 @@ void moveGhost3(Ghost& ghost)
     int y = ghost.y;
 
 
+    if (g3.isFrightened == 0)
+ {
     if (std::abs(dx) > std::abs(dy)) 
     {
         if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y)) 
@@ -658,6 +821,39 @@ void moveGhost3(Ghost& ghost)
             }
         }
     }
+  }
+  else
+  {
+  	if (std::abs(dx) > std::abs(dy)) {
+    if (dx > 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost3collision(x-1,y)) {
+        ghost.x -= 1;
+    } else if (dx < 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y)) {
+        ghost.x += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost3collision(x,y-1)) {
+            ghost.y -= 1;
+        } else if (maze[ghost.x][ghost.y + 1] != 1 && !checkghost3collision(x,y+1)) {
+            ghost.y += 1;
+        }
+    }
+} else {
+    if (dy > 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost3collision(x,y-1)) {
+        ghost.y -= 1;
+    } else if (dy < 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost3collision(x,y+1)) {
+        ghost.y += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost3collision(x-1,y)) {
+            ghost.x -= 1;
+        } else if (maze[ghost.x + 1][ghost.y] != 1 && !checkghost3collision(x+1,y)) {
+            ghost.x += 1;
+        }
+    }
+}
+
+  }
+  
+  x = checkteleport_gh(x, y);
+  
 }
 
 void moveGhost4(Ghost& ghost) 
@@ -668,6 +864,8 @@ void moveGhost4(Ghost& ghost)
     int x = ghost.x;
     int y = ghost.y;
 
+    if (g4.isFrightened == 0)
+ {
     if (std::abs(dx) > std::abs(dy)) 
     {
         if (dx > 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y)) 
@@ -712,6 +910,37 @@ void moveGhost4(Ghost& ghost)
             }
         }
     }
+  }
+  else
+  {
+  	if (std::abs(dx) > std::abs(dy)) {
+    if (dx > 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost4collision(x-1,y)) {
+        ghost.x -= 1;
+    } else if (dx < 0 && maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y)) {
+        ghost.x += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost4collision(x,y-1)) {
+            ghost.y -= 1;
+        } else if (maze[ghost.x][ghost.y + 1] != 1 && !checkghost4collision(x,y+1)) {
+            ghost.y += 1;
+        }
+    }
+} else {
+    if (dy > 0 && maze[ghost.x][ghost.y - 1] != 1 && !checkghost4collision(x,y-1)) {
+        ghost.y -= 1;
+    } else if (dy < 0 && maze[ghost.x][ghost.y + 1] != 1 && !checkghost4collision(x,y+1)) {
+        ghost.y += 1;
+    } else {
+        if (rand() % 2 == 0 && maze[ghost.x - 1][ghost.y] != 1 && !checkghost4collision(x-1,y)) {
+            ghost.x -= 1;
+        } else if (maze[ghost.x + 1][ghost.y] != 1 && !checkghost4collision(x+1,y)) {
+            ghost.x += 1;
+        }
+    }
+}
+
+  }
+  x = checkteleport_gh(x, y);
 }
 
 void checkpacdot(int x, int y) //m
@@ -720,6 +949,19 @@ void checkpacdot(int x, int y) //m
 	{
 		score++;
 		pacdots[x][y] = 0;
+	}
+	if (g1.isFrightened != 1)
+	{
+		if (pacdots[x][y] == 2 && g1.isFrightened == 0)
+		{
+			g1.isFrightened = 1;
+			g2.isFrightened = 1;
+			g3.isFrightened = 1;
+			g4.isFrightened = 1;
+			pacdots[x][y] = 0;
+			pellet_consumed_x = x;
+			pellet_consumed_y = y;
+		}
 	}
 }
 
