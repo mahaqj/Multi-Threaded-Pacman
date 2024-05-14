@@ -20,7 +20,7 @@ pthread_mutex_t mutex;
 sem_t gameEngineSemaphore, turnSemaphore; 
 pthread_mutex_t coutmutex;
 
-pthread_t pellet_respawn;
+pthread_t pellet_respawn; //scenario 2
 
 sem_t ghostSemaphore;//new
 sem_t speedBoostSemaphore;//new
@@ -31,6 +31,39 @@ const int BOOSTED_SLEEP_DURATION = 200000;//new
 std::chrono::high_resolution_clock::time_point fastStartTime[4];//new
 int completedSpeedBoosts = 0;//new
 pthread_mutex_t boostCountMutex;//new
+
+pthread_mutex_t resourceMutex;//to prevent deadlock cond in ghosts  //new3
+sem_t keySemaphore;//new3
+sem_t permitSemaphore;//new3
+const int VISIBLE_DELAY_DURATION = 2000000; //new3 to have a visible delay in ghosts leaving house 
+
+void acquireResourcesAndLeave(int ghostIndex) 
+{//new3
+   //mutex lock laga diya so no other thread can preempt it hence no deadlock occurs
+    pthread_mutex_lock(&resourceMutex);
+
+    
+    sem_wait(&keySemaphore);
+    sem_wait(&permitSemaphore);
+
+    pthread_mutex_lock(&coutmutex);
+    cout << "ghost " << ghostIndex << " acquired key and permit" << endl;
+    pthread_mutex_unlock(&coutmutex);
+
+   //ab preempt kar bhi do to no masla
+    pthread_mutex_unlock(&resourceMutex);
+//so that thora delay aaye 
+    usleep(VISIBLE_DELAY_DURATION);
+
+    
+    sem_post(&permitSemaphore);
+    sem_post(&keySemaphore);
+
+    pthread_mutex_lock(&coutmutex);
+    cout << "2 seconds later ghost " << ghostIndex << " left the ghost house" << endl;
+    pthread_mutex_unlock(&coutmutex);
+}
+
 
 int calculateManhattanDistance(int x1, int y1, int x2, int y2)//new
 {
@@ -98,9 +131,8 @@ bool isFastDurationElapsed(int index) {//new
     return elapsedTime.count() >= FAST_DURATION_SECONDS;
 }
 
-void* updateGhost(void* arg)
-{
-    Ghost* ghost = (Ghost*)arg;//new
+void* updateGhost(void* arg) {//new3
+    Ghost* ghost = (Ghost*)arg;
     int ghostIndex = -1;
 
     if (ghost == &g1) ghostIndex = 0;
@@ -108,9 +140,13 @@ void* updateGhost(void* arg)
     else if (ghost == &g3) ghostIndex = 2;
     else if (ghost == &g4) ghostIndex = 3;
 
-    while (1)
-    {
-    	sem_wait(&ghostSemaphore);
+    while (1) {
+        sem_wait(&ghostSemaphore);
+//agar ghost house k door par hey only then do the key permit stuff
+        if (ghost->x == 9 && (ghost->y == 10 || ghost->y == 12)) {
+            acquireResourcesAndLeave(ghostIndex);
+         
+        }
 
         if (ghost->isFast && !ghost->speedBoosted) {
             pthread_mutex_lock(&coutmutex);
@@ -138,56 +174,13 @@ void* updateGhost(void* arg)
 
         glutPostRedisplay();
 
-        if (ghost->speedBoosted) {//new
+        if (ghost->speedBoosted) {
             usleep(BOOSTED_SLEEP_DURATION);
         } else {
             usleep(NORMAL_SLEEP_DURATION);
         }
 
-        sem_post(&ghostSemaphore); //yahan tak speed boost wala tha
-    
-    
-        sem_wait(&turnSemaphore); // Wait for turn
-        pthread_mutex_lock(&mutex); // Lock 
-        pthread_mutex_lock(&coutmutex);
-        cout << "ghost " << ghostIndex << endl;
-        pthread_mutex_unlock(&coutmutex);
-        if (ghost->x == g1.x && ghost->y == g1.y)
-        {
-            moveGhost1(*ghost); //glutPostRedisplay();
-            if (g1.speedBoosted == 1)
-            {
-            	moveGhost1(*ghost);
-            }
-        }
-        else if (ghost->x == g2.x && ghost->y == g2.y)
-        {
-            moveGhost2(*ghost); //glutPostRedisplay();
-            if (g1.speedBoosted == 1)
-            {
-            	moveGhost1(*ghost);
-            }
-        }
-        else if (ghost->x == g3.x && ghost->y == g3.y)
-        {
-            moveGhost3(*ghost); //glutPostRedisplay();
-            if (g1.speedBoosted == 1)
-            {
-            	moveGhost1(*ghost);
-            }
-        }
-        else if (ghost->x == g4.x && ghost->y == g4.y)
-        {
-            moveGhost4(*ghost); //glutPostRedisplay();
-            if (g1.speedBoosted == 1)
-            {
-            	moveGhost1(*ghost);
-            }
-        }
-        glutPostRedisplay();
-        pthread_mutex_unlock(&mutex); // Unlock 
-        sem_post(&turnSemaphore); // Release turn
-        usleep(500000);
+        sem_post(&ghostSemaphore);
     }
     return NULL;
 }
@@ -196,12 +189,16 @@ void* updatePacman(void* arg)
 {
     while (1)
     {
-        sem_wait(&turnSemaphore); // Wait for turn
+    pthread_mutex_lock(&mutex); //lock 
+    pthread_mutex_lock(&coutmutex);
+    cout << "pacman " << endl;
+    pthread_mutex_unlock(&coutmutex);
+    sem_wait(&turnSemaphore); //wait for turn
         movement();
-        //glutPostRedisplay();
-        sem_post(&turnSemaphore); // Release turn
-       // sem_post(&pacmanSemaphore); // Signal that Pacman movement is done
-        usleep(100000);
+    pthread_mutex_unlock(&mutex); //unlock
+        
+        sem_post(&turnSemaphore); //ab next turn possible hai
+        usleep(150000);
     }
     return NULL;
 }
@@ -215,6 +212,8 @@ void startGhostThreads()
     pthread_create(&ghostThreads[1], NULL, updateGhost, (void*)&g2);
     pthread_create(&ghostThreads[2], NULL, updateGhost, (void*)&g3);
     pthread_create(&ghostThreads[3], NULL, updateGhost, (void*)&g4);
+    
+    usleep(100);
 }
 
 void stopGhostThreads()
@@ -228,6 +227,8 @@ void stopGhostThreads()
 void startPacmanThread()
 {
     pthread_create(&pacmanThread, NULL, updatePacman, NULL);
+    
+    usleep(100);
 }
 
 void stopPacmanThread()
@@ -235,14 +236,10 @@ void stopPacmanThread()
     pthread_cancel(pacmanThread);
 }
 
+
 void keyboard_callback(unsigned char key, int x, int y)
 {
-    pthread_mutex_lock(&mutex); // Lock 
-    pthread_mutex_lock(&coutmutex);
-    cout << "pacman " << endl;
-    pthread_mutex_unlock(&coutmutex);
     currentmove = key;
-    pthread_mutex_unlock(&mutex); // Unlock
 }
 
 void* uifunc(void* arg)
@@ -271,7 +268,7 @@ void* produce_pellet(void* arg)
 	while (1)
 	{
 		pthread_mutex_lock(&mutex);
-		if (pelletmoves == 35)
+		if (pelletmoves == 18)
 		{
 			pacdots[pellet_consumed_x][pellet_consumed_y] = 2;
 		}
@@ -313,21 +310,24 @@ void* gameEngine(void* arg)
     stopPacmanThread();
     stopuiThread();
 
-    sem_post(&gameEngineSemaphore); // Release semaphore when game engine thread finishes
+    sem_post(&gameEngineSemaphore); //semaphore ends when game engine thread finishes
     return NULL;
 }
 
 void startGameEngineThread()
 {
-    sem_init(&gameEngineSemaphore, 0, 0); // Initialize semaphore
-   // sem_init(&pacmanSemaphore, 0, 1); // Initialize pacman semaphore with 1 to allow movement at the beginning
-   
-    //sem_init(&pacmanSemaphore, 0, 1);//new
+    sem_init(&gameEngineSemaphore, 0, 0); 
+
     sem_init(&ghostSemaphore, 0, 4);//new
     sem_init(&speedBoostSemaphore, 0, 2);//new
     pthread_mutex_init(&boostCountMutex, NULL);//new
    
-    sem_init(&turnSemaphore, 0, 5); // Initialize turn semaphore with 5 to allow 5 turns initially
+    sem_init(&turnSemaphore, 0, 5); //initialise turn semaphore with 5 to allow 5 turns initially
+    
+    sem_init(&keySemaphore, 0, 2); //aik time par 2 ghosts can leave the house my marzi //new3
+    sem_init(&permitSemaphore, 0, 2); //new3
+    pthread_mutex_init(&resourceMutex, NULL); //new3
+    
     pthread_create(&gameEngineThread, NULL, gameEngine, NULL);
 }
 
@@ -344,15 +344,13 @@ int main(int argc, char** argv)
 
     startGameEngineThread();
 
-    sem_wait(&gameEngineSemaphore); // Wait for game engine thread to finish
+    sem_wait(&gameEngineSemaphore); //this waits for the game engine thread to finish
 
     pthread_mutex_destroy(&mutex);
     sem_destroy(&gameEngineSemaphore);
-    //sem_destroy(&pacmanSemaphore);//new
     sem_destroy(&ghostSemaphore);//new
     sem_destroy(&speedBoostSemaphore);//new
     pthread_mutex_destroy(&boostCountMutex);//new
- //   sem_destroy(&pacmanSemaphore); 
     sem_destroy(&turnSemaphore); 
 
     return 0;
